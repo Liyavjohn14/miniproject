@@ -1,35 +1,113 @@
-from flask import Flask, render_template, request
-import pickle
+
+from flask import Flask, request, escape, render_template
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
+from sklearn.compose import ColumnTransformer
 import numpy as np
-
-model = pickle.load(open('train-stokes.pkl', 'rb'))
-
-app = Flask(__name__)
-
+from imblearn.over_sampling import SMOTE
+import sklearn
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from joblib import dump, load
 
 
 @app.route('/')
-def man():
-    return render_template('home.html')
+def index():
+    return render_template('index.html')
 
+@app.route('/prediction', methods=['POST'])
+def prediction():
+    gender = request.form['gender']
+    age = float(request.form['age'])
+    hypertension = int(request.form['hypertension'])
+    heartdisease = int(request.form['heartdisease'])
+    ever_married = request.form['ever_married']
+    work_type = request.form['work_type']
+    Residence_type = request.form['Residence_type']
+    avg_glucose_level = float(request.form['avg_glucose_level'])
+    bmi = float(request.form['bmi'])
+    smoking_status = request.form['smoking']
 
-@app.route('/predict', methods=['POST'])
-def home():
-    data1 = request.form['a']
-    data2 = request.form['b']
-    data3 = request.form['c']
-    data4 = request.form['d']
-    data5 = request.form['e']
-    data6 = request.form['f']
-    data7 = request.form['g']
-    data8 = request.form['h']
-    data9 = request.form['i']
-    data10 = request.form['j']
-   
-    arr = np.array([[data1, data2, data3, data4, data5, data6, data7, data8, data9, data10]])
-    pred = model.predict(arr)
-    return render_template('after.html', data=pred)
+        if (gender == "Male"):
+            gender_male=1
+            gender_other=0
+        elif(gender == "Other"):
+            gender_male = 0
+            gender_other = 1
+        else:
+            gender_male=0
+            gender_other=0
+        
+        # married
+        if(married=="Yes"):
+            married_yes = 1
+        else:
+            married_yes=0
 
+        # work  type
+        if(work=='Self-employed'):
+            work_type_Never_worked = 0
+            work_type_Private = 0
+            work_type_Self_employed = 1
+            work_type_children=0
+        elif(work == 'Private'):
+            work_type_Never_worked = 0
+            work_type_Private = 1
+            work_type_Self_employed = 0
+            work_type_children=0
+        elif(work=="children"):
+            work_type_Never_worked = 0
+            work_type_Private = 0
+            work_type_Self_employed = 0
+            work_type_children=1
+        elif(work=="Never_worked"):
+            work_type_Never_worked = 1
+            work_type_Private = 0
+            work_type_Self_employed = 0
+            work_type_children=0
+        else:
+            work_type_Never_worked = 0
+            work_type_Private = 0
+            work_type_Self_employed = 0
+            work_type_children=0
 
-if __name__ == "__main__":
+        # residence type
+        if (residence=="Urban"):
+            Residence_type_Urban=1
+        else:
+            Residence_type_Urban=0
+
+        # smoking sttaus
+        if(smoking=='formerly smoked'):
+            smoking_status_formerly_smoked = 1
+            smoking_status_never_smoked = 0
+            smoking_status_smokes = 0
+        elif(smoking == 'smokes'):
+            smoking_status_formerly_smoked = 0
+            smoking_status_never_smoked = 0
+            smoking_status_smokes = 1
+        elif(smoking=="never smoked"):
+            smoking_status_formerly_smoked = 0
+            smoking_status_never_smoked = 1
+            smoking_status_smokes = 0
+        else:
+            smoking_status_formerly_smoked = 0
+            smoking_status_never_smoked = 0
+            smoking_status_smokes = 0
+
+        feature = scaler.fit_transform([[age, hypertension, disease, glucose, bmi, gender_male, gender_other, married_yes, work_type_Never_worked, work_type_Private, work_type_Self_employed, work_type_children, Residence_type_Urban,smoking_status_formerly_smoked, smoking_status_never_smoked, smoking_status_smokes]])
+
+        prediction = model.predict(feature)[0]
+
+    if result == 1:
+        return "Yes, you may be likely to have a stroke. Please see a doctor."
+    elif result == 0:
+        return "No, you are not likely to have a stroke" 
+    return render_template("index.html", prediction_text="Chance of Stroke Prediction is --> {}".format(prediction))
+
+if __name__ == '__main__':
+    # you can run init / fiting here
     app.run(debug=True)
