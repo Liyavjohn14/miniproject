@@ -11,7 +11,7 @@ import sklearn
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from joblib import dump, load
+import pickle
 
 
 @app.route('/')
@@ -31,81 +31,81 @@ def prediction():
     bmi = float(request.form['bmi'])
     smoking_status = request.form['smoking']
 
-        if (gender == "Male"):
+    if (gender == "Male"):
             gender_male=1
             gender_other=0
-        elif(gender == "Other"):
+    elif(gender == "Other"):
             gender_male = 0
             gender_other = 1
-        else:
+    else:
             gender_male=0
             gender_other=0
         
         # married
-        if(married=="Yes"):
+    if(married=="Yes"):
             married_yes = 1
-        else:
+    else:
             married_yes=0
 
         # work  type
-        if(work=='Self-employed'):
+    if(work=='Self-employed'):
             work_type_Never_worked = 0
             work_type_Private = 0
             work_type_Self_employed = 1
             work_type_children=0
-        elif(work == 'Private'):
+    elif(work == 'Private'):
             work_type_Never_worked = 0
             work_type_Private = 1
             work_type_Self_employed = 0
             work_type_children=0
-        elif(work=="children"):
+    elif(work=="children"):
             work_type_Never_worked = 0
             work_type_Private = 0
             work_type_Self_employed = 0
             work_type_children=1
-        elif(work=="Never_worked"):
+    elif(work=="Never_worked"):
             work_type_Never_worked = 1
             work_type_Private = 0
             work_type_Self_employed = 0
             work_type_children=0
-        else:
+    else:
             work_type_Never_worked = 0
             work_type_Private = 0
             work_type_Self_employed = 0
             work_type_children=0
 
         # residence type
-        if (residence=="Urban"):
+    if (residence=="Urban"):
             Residence_type_Urban=1
-        else:
+    else:
             Residence_type_Urban=0
 
         # smoking sttaus
-        if(smoking=='formerly smoked'):
+    if(smoking=='formerly smoked'):
             smoking_status_formerly_smoked = 1
             smoking_status_never_smoked = 0
             smoking_status_smokes = 0
-        elif(smoking == 'smokes'):
+    elif(smoking == 'smokes'):
             smoking_status_formerly_smoked = 0
             smoking_status_never_smoked = 0
             smoking_status_smokes = 1
-        elif(smoking=="never smoked"):
+    elif(smoking=="never smoked"):
             smoking_status_formerly_smoked = 0
             smoking_status_never_smoked = 1
             smoking_status_smokes = 0
-        else:
+    else:
             smoking_status_formerly_smoked = 0
             smoking_status_never_smoked = 0
             smoking_status_smokes = 0
 
-        feature = scaler.fit_transform([[age, hypertension, disease, glucose, bmi, gender_male, gender_other, married_yes, work_type_Never_worked, work_type_Private, work_type_Self_employed, work_type_children, Residence_type_Urban,smoking_status_formerly_smoked, smoking_status_never_smoked, smoking_status_smokes]])
+    feature = scaler.fit_transform([[age, hypertension, disease, glucose, bmi, gender_male, gender_other, married_yes, work_type_Never_worked, work_type_Private, work_type_Self_employed, work_type_children, Residence_type_Urban,smoking_status_formerly_smoked, smoking_status_never_smoked, smoking_status_smokes]])
 
-        prediction = model.predict(feature)[0]
+    prediction = model.predict(feature)[0]
 
-    if result == 1:
-        return "Yes, you may be likely to have a stroke. Please see a doctor."
-    elif result == 0:
-        return "No, you are not likely to have a stroke" 
+    if prediction == 1:
+       print("Yes, you may be likely to have a stroke. Please see a doctor.")
+    elif prediction == 0:
+        print("No, you are not likely to have a stroke")
     return render_template("index.html", prediction_text="Chance of Stroke Prediction is --> {}".format(prediction))
 
 if __name__ == '__main__':
